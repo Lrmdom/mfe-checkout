@@ -8,7 +8,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "NODE_OPTIONS='--inspect' next dev",
-    "build": "next build",
+    "build": "next build --no-lint",
     "start": "next start -p $PORT",
     "lint": "eslint ./ --ext .js,.jsx,.tsx,.ts",
     "lint:fix": "eslint ./ --ext .tsx,.ts --fix",
