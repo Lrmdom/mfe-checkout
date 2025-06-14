@@ -1,23 +1,78 @@
-FROM node:18.17.0-alpine
+# Usa uma imagem base do Node.js para o ambiente de construção
+# Atualizado para a versão 20.x, conforme especificado no package.json
+FROM node:20.12.2-alpine AS builder
 
-WORKDIR /home/circleci/project
+# Define o diretório de trabalho dentro do contêiner para o estágio de construção
+WORKDIR /app
 
-RUN apk add g++ make py3-pip
+# Instala as dependências necessárias para a construção (g++, make, py3-pip)
+# Essas dependências podem ser necessárias para certas dependências nativas do npm/pnpm.
+# Usamos '--no-cache' para reduzir o tamanho da imagem final.
+RUN apk add --no-cache g++ make py3-pip
+
+# Habilita o Corepack e prepara o pnpm na versão especificada
+# Corepack é um gerenciador de pacote que permite usar diferentes gerenciadores de pacotes como pnpm.
+# A versão do pnpm (8.10.2) é mantida conforme o seu exemplo original.
 RUN corepack enable && corepack prepare pnpm@8.10.2 --activate
 
+# Copia os arquivos de configuração do projeto (package.json e pnpm-lock.yaml) para o diretório de trabalho
+# Isso é feito separadamente para aproveitar o cache do Docker layer,
+# pois esses arquivos mudam com menos frequência do que o código-fonte.
 COPY package.json pnpm-lock.yaml ./
 
+# Define a variável de ambiente NODE_ENV como 'production'
+# Isso otimiza a instalação de dependências e o processo de construção para produção.
 ENV NODE_ENV production
 
+# Instala as dependências do projeto usando pnpm
+# Isso garante que todas as dependências listadas no package.json sejam instaladas.
 RUN pnpm install
 
+# Copia o restante dos arquivos do projeto para o diretório de trabalho.
+# Este passo deve ser feito após a instalação das dependências.
 COPY . .
 
-# To build the image you can use:
-# docker build -t checkout -f Dockerfile.production ./
-# 
-# To export the Next.js application you can run on your shell:
-# docker run --volume ~/path-to-out-folder:/home/circleci/project/out -it checkout pnpm run build
-#
-# you can specify other environment variables directly on .env.production.local file
+# Constrói a aplicação Next.js para exportação estática.
+# 'pnpm run build' executa o script de construção definido no package.json.
+# A saída da construção será colocada na pasta '.next'.
+RUN pnpm run build
 
+# --- Estágio de Produção (Imagem menor para execução) ---
+# Usa uma imagem Node.js menor e mais leve para o ambiente de execução.
+# Atualizado para a versão 20.x, consistente com o estágio de construção.
+FROM node:20.12.2-alpine
+
+# Define o diretório de trabalho para a aplicação em produção.
+WORKDIR /app
+
+# Copia apenas os arquivos essenciais do estágio 'builder' para a imagem final.
+# Isso inclui:
+# - next.config.js: O arquivo de configuração do Next.js.
+# - public: O diretório de arquivos estáticos.
+# - .next/standalone: Os arquivos da construção 'standalone' do Next.js.
+# - .next/static: Os ativos estáticos gerados.
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Expõe a porta 3000, que é a porta padrão para aplicações Next.js.
+EXPOSE 3000
+
+# Define o comando padrão para iniciar a aplicação Next.js em produção.
+# Usa o script 'start' definido no package.json, que executa 'next start -p $PORT'.
+CMD ["pnpm", "start"]
+
+# --- Instruções de Uso ---
+# Para construir a imagem, você pode usar:
+# docker build -t nextjs-app -f Dockerfile ./
+#
+# Para executar a aplicação Next.js em um contêiner:
+# docker run -p 3000:3000 nextjs-app
+#
+# Se você precisar exportar a aplicação Next.js para arquivos estáticos (se a construção for feita para exportação),
+# você pode montar um volume a partir do estágio 'builder' para acessar a pasta 'out' ou '.next'.
+# Exemplo (assumindo que 'out' é o diretório de saída):
+# docker run --rm --volume "$(pwd)/local-out:/app/out" builder-image-name pnpm run export
+#
+# Você pode especificar outras variáveis de ambiente diretamente no arquivo .env.production.local.
