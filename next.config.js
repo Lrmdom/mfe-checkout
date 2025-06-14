@@ -7,10 +7,8 @@ const shouldAnalyzeBundles = process.env.ANALYZE === "true"
 /** @type { import('next').NextConfig } */
 let nextConfig = {
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  output: process.env.NODE_ENV === "production" ? "export" : "standalone",
+  eslint: {},
+  output: "out/dist",
   distDir: "out/dist",
   poweredByHeader: false,
   swcMinify: false,
