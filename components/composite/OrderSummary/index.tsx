@@ -1,3 +1,5 @@
+import useOrderContainer from "@commercelayer/react-components/hooks/useOrderContainer"
+
 import LineItemsContainer from "@commercelayer/react-components/line_items/LineItemsContainer"
 import LineItemsCount from "@commercelayer/react-components/line_items/LineItemsCount"
 import AdjustmentAmount from "@commercelayer/react-components/orders/AdjustmentAmount"
