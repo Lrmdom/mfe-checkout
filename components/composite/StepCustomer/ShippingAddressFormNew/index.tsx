@@ -67,6 +67,7 @@ export const ShippingAddressFormNew: React.FC<Props> = ({
         <AddressInputGroup
           fieldName="shipping_address_country_code"
           resource="shipping_address"
+            // @ts-ignore
           countries={countries}
           defaultCountry={defaultCountry}
           type="text"
@@ -78,6 +79,7 @@ export const ShippingAddressFormNew: React.FC<Props> = ({
         <AddressInputGroup
           fieldName="shipping_address_state_code"
           resource="shipping_address"
+            // @ts-ignore
           states={states}
           type="text"
           value={shippingAddress?.state_code || ""}

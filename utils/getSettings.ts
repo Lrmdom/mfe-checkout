@@ -1,5 +1,5 @@
 import { jwtDecode, jwtIsSalesChannel } from "@commercelayer/js-auth"
-import { getMfeConfig } from "@commercelayer/organization-config"
+import {getConfig } from "@commercelayer/organization-config"
 import CommerceLayer, {
   CommerceLayerStatic,
   type CommerceLayerClient,
@@ -69,6 +69,7 @@ function getOrganization(
   return retryCall<Organization>(() =>
     cl.organization.retrieve({
       fields: {
+        // @ts-ignore
         organizations: [
           "id",
           "logo_url",
@@ -271,12 +272,13 @@ export const getSettings = async ({
     supportPhone: organization.support_phone,
     termsUrl: order.terms_url,
     privacyUrl: order.privacy_url,
-    config: getMfeConfig({
+    config: getConfig({
       jsonConfig: organization.config ?? {},
       market: `market:id:${marketId}`,
       params: {
         lang: order.language_code,
         orderId: order.id,
+        // @ts-ignore
         token: order.token,
         slug: slug,
         accessToken,

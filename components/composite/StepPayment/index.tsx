@@ -1,4 +1,4 @@
-import "@adyen/adyen-web/styles/adyen.css"
+//import "@adyen/adyen-web/styles/adyen.css"
 import {
   type PaymentMethodOnClickParams,
   PaymentSource,

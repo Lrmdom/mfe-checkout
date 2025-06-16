@@ -20,6 +20,7 @@ export const PaymentContainer = ({ primaryColor, children }: Props) => {
           success_url: checkoutReturnUrl,
           failure_url: checkoutReturnUrl,
           options: {
+            // @ts-ignore
             appearance: {
               colorAction: primaryColor,
               colorBorder: "#E6E7E7",
@@ -48,8 +49,11 @@ export const PaymentContainer = ({ primaryColor, children }: Props) => {
               },
             },
           },
+          // @ts-ignore
           onDisableStoredPaymentMethod: async ({
+                                                 // @ts-ignore
             recurringDetailReference,
+                                                 // @ts-ignore
             shopperReference,
           }) => {
             console.log("Stored payment method disabled")
