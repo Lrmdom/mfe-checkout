@@ -115,7 +115,6 @@ const Checkout: React.FC<Props> = ({
   }
 
   const renderSteps = () => {
-    // @ts-ignore
     return (
       <CustomerContainer isGuest={ctx.isGuest}>
         <LayoutDefault
@@ -211,6 +210,7 @@ const Checkout: React.FC<Props> = ({
                           redirectResult,
                         },
                         stripe: {
+                          // @ts-ignore
                           paymentIntentClientSecret,
                         },
                       }}
