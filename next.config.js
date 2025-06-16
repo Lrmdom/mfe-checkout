@@ -10,7 +10,7 @@ let nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  output: process.env.NODE_ENV === "production" ? "export" : "standalone",
+  output: process.env.NODE_ENV === "development" ? "standalone" : "standalone",
   distDir: "out/dist",
   poweredByHeader: false,
   webpack: (config) => {
