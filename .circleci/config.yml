@@ -7,7 +7,7 @@ orbs:
 jobs:
   test: # this can be any name you choose
     docker:
-      - image: mcr.microsoft.com/playwright:v1.47.2-focal
+      - image: mcr.microsoft.com/playwright:v1.52.0-noble
     resource_class: medium+
     parallelism: 10
 
@@ -47,11 +47,12 @@ jobs:
             pnpm run build
       - run:
           name: Run tests
+          no_output_timeout: 15m
           command: |
             mkdir test-results
             pnpm run serve &
             TESTFILES=$(circleci tests glob "specs/e2e/**/*.spec.ts")
-            echo $TESTFILES | circleci tests run --command="xargs pnpm playwright test --config=playwright.config.ci.ts --reporter=junit" --verbose --split-by=timings
+            echo $TESTFILES | circleci tests run --command="xargs pnpm playwright test --config=playwright.config.ci.ts --reporter=list" --verbose --split-by=timings
       - store_test_results:
           path: test-results/junit.xml
       - store_artifacts:
@@ -59,7 +60,7 @@ jobs:
 
   build:
     docker:
-      - image: cimg/node:18.17.0
+      - image: cimg/node:20.18.0
     resource_class: medium
     environment:
       FOLDER: checkout
@@ -86,7 +87,7 @@ jobs:
 
   build-on-pci-bucket:
     docker:
-      - image: cimg/node:18.17.0
+      - image: cimg/node:20.18.0
     resource_class: medium
     environment:
       FOLDER: checkout

@@ -1,17 +1,17 @@
 import { LineItemField } from "@commercelayer/react-components"
 import {
   LineItem,
-  TLineItem,
+  type TLineItem,
 } from "@commercelayer/react-components/line_items/LineItem"
 import LineItemAmount from "@commercelayer/react-components/line_items/LineItemAmount"
 import LineItemImage from "@commercelayer/react-components/line_items/LineItemImage"
 import LineItemName from "@commercelayer/react-components/line_items/LineItemName"
 import LineItemOption from "@commercelayer/react-components/line_items/LineItemOption"
 import LineItemQuantity from "@commercelayer/react-components/line_items/LineItemQuantity"
-import cronParser from "cron-parser"
+import { CronExpressionParser } from "cron-parser"
 import cronstrue from "cronstrue"
 import { useTranslation } from "next-i18next"
-import React from "react"
+import type React from "react"
 import "cronstrue/locales/en"
 import "cronstrue/locales/it"
 import "cronstrue/locales/de"
@@ -22,12 +22,12 @@ import { FlexContainer } from "components/ui/FlexContainer"
 
 import {
   LineItemDescription,
-  LineItemQty,
   LineItemFrequency,
+  LineItemQty,
   LineItemTitle,
   LineItemWrapper,
-  StyledLineItemSkuCode,
   StyledLineItemOptions,
+  StyledLineItemSkuCode,
 } from "./styled"
 
 interface Props {
@@ -79,7 +79,7 @@ export const LineItemTypes: React.FC<Props> = ({ type }) => {
                 }
                 let isCronValid = true
                 try {
-                  cronParser.parseExpression(attributeValue as string)
+                  CronExpressionParser.parse(attributeValue as string)
                 } catch (e) {
                   isCronValid = false
                 }

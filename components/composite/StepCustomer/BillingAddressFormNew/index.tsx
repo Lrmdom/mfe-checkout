@@ -1,9 +1,9 @@
-import { Address } from "@commercelayer/sdk"
+import type { Address } from "@commercelayer/sdk"
 import { useContext } from "react"
 import styled from "styled-components"
 import tw from "twin.macro"
 
-import { ShippingToggleProps } from "components/composite/StepCustomer"
+import type { ShippingToggleProps } from "components/composite/StepCustomer"
 import { AddressInputGroup } from "components/composite/StepCustomer/AddressInputGroup"
 import { AppContext } from "components/data/AppProvider"
 import { useSettingsOrInvalid } from "components/hooks/useSettingsOrInvalid"
@@ -29,6 +29,7 @@ export const BillingAddressFormNew: React.FC<Props> = ({
   const countries = settings?.config?.checkout?.billing_countries
   const states = settings?.config?.checkout?.billing_states
   const defaultCountry = settings?.config?.checkout?.default_country
+  const optionalBillingInfo = settings?.config?.checkout?.optional_billing_info
 
   return (
     <Wrapper>
@@ -70,7 +71,6 @@ export const BillingAddressFormNew: React.FC<Props> = ({
           fieldName="billing_address_country_code"
           resource="billing_address"
           type="text"
-          // @ts-expect-error missing type
           countries={countries}
           defaultCountry={defaultCountry}
           openShippingAddress={openShippingAddress}
@@ -81,7 +81,6 @@ export const BillingAddressFormNew: React.FC<Props> = ({
         <AddressInputGroup
           fieldName="billing_address_state_code"
           resource="billing_address"
-          // @ts-expect-error missing type
           states={states}
           type="text"
           value={billingAddress?.state_code || ""}
@@ -99,10 +98,11 @@ export const BillingAddressFormNew: React.FC<Props> = ({
         type="tel"
         value={billingAddress?.phone || ""}
       />
-      {requiresBillingInfo && (
+      {(requiresBillingInfo || optionalBillingInfo) && (
         <AddressInputGroup
           fieldName="billing_address_billing_info"
           resource="billing_address"
+          required={!!requiresBillingInfo}
           type="text"
           value={billingAddress?.billing_info || ""}
         />

@@ -1,12 +1,12 @@
-import { LineItem, Order } from "@commercelayer/sdk"
-import { createContext, useEffect, useContext, useRef } from "react"
+import type { LineItem, Order } from "@commercelayer/sdk"
+import { createContext, useContext, useEffect, useRef } from "react"
 import TagManager from "react-gtm-module"
 
 import { AppContext } from "components/data/AppProvider"
 import type { TypeAccepted } from "components/data/AppProvider/utils"
 import { LINE_ITEMS_SHOPPABLE } from "components/utils/constants"
 
-import { DataLayerItemProps, DataLayerProps } from "./typings"
+import type { DataLayerItemProps, DataLayerProps } from "./typings"
 
 interface GTMProviderData {
   fireAddShippingInfo: (order: Order) => void
@@ -28,27 +28,25 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
   skipBeginCheckout,
 }) => {
   const isFirstLoading = useRef(true)
-
-  if (!gtmId) {
-    return <>{children}</>
-  }
   const ctx = useContext(AppContext)
 
-  if (!ctx) {
+  useEffect(() => {
+    if (!gtmId || !ctx || !ctx.order) return
+
+    if (isFirstLoading.current) {
+      isFirstLoading.current = false
+      TagManager.initialize({ gtmId })
+      if (!skipBeginCheckout) {
+        fireBeginCheckout(ctx.order)
+      }
+    }
+  }, [gtmId, ctx, skipBeginCheckout])
+
+  if (!gtmId || !ctx) {
     return <>{children}</>
   }
 
   const { order } = ctx
-
-  useEffect(() => {
-    if (isFirstLoading.current && gtmId != null && order != null) {
-      isFirstLoading.current = false
-      TagManager.initialize({ gtmId })
-      if (!skipBeginCheckout) {
-        fireBeginCheckout(order)
-      }
-    }
-  }, [order])
 
   const pushDataLayer = ({ eventName, dataLayer }: DataLayerProps) => {
     try {
@@ -103,7 +101,7 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
       const lineItems = shipment.stock_line_items?.map(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        (e) => e && mapItemsToGTM(e.line_item)
+        (e) => e && mapItemsToGTM(e.line_item),
       )
 
       pushDataLayer({

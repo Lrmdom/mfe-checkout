@@ -2,17 +2,17 @@ import AddressCountrySelector from "@commercelayer/react-components/addresses/Ad
 import AddressInput from "@commercelayer/react-components/addresses/AddressInput"
 import AddressStateSelector from "@commercelayer/react-components/addresses/AddressStateSelector"
 import { Errors } from "@commercelayer/react-components/errors/Errors"
-import {
+import type {
   Country,
   States,
 } from "@commercelayer/react-components/lib/esm/utils/countryStateCity"
-import { ChangeEvent, useContext } from "react"
+import { type ChangeEvent, useContext } from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import tw from "twin.macro"
 
 import {
-  ShippingToggleProps,
+  type ShippingToggleProps,
   evaluateShippingToggle,
 } from "components/composite/StepCustomer"
 import { AppContext } from "components/data/AppProvider"
@@ -38,7 +38,6 @@ interface Props {
   countries?: Country[] | undefined
   defaultCountry?: string
   states?: States[]
-  pattern?: React.ComponentProps<typeof AddressInput>["pattern"]
   openShippingAddress?: (props: ShippingToggleProps) => void
 }
 
@@ -47,7 +46,6 @@ export const AddressInputGroup: React.FC<Props> = ({
   resource,
   required,
   type,
-  pattern,
   countries,
   defaultCountry,
   states,
@@ -105,10 +103,9 @@ export const AddressInputGroup: React.FC<Props> = ({
     if (isCountry && fieldName === "billing_address_country_code") {
       const countryCode = event.target.value
 
-      openShippingAddress &&
-        openShippingAddress(
-          evaluateShippingToggle({ countryCode, shippingCountryCodeLock })
-        )
+      openShippingAddress?.(
+        evaluateShippingToggle({ countryCode, shippingCountryCodeLock }),
+      )
     }
   }
 
@@ -137,13 +134,14 @@ export const AddressInputGroup: React.FC<Props> = ({
             }
             disabled={Boolean(
               shippingCountryCodeLock &&
-                fieldName === "shipping_address_country_code"
+                fieldName === "shipping_address_country_code",
             )}
           />
           <Label htmlFor={fieldName}>{label}</Label>
         </>
       )
-    } else if (isState) {
+    }
+    if (isState) {
       return (
         <>
           <StyledAddressStateSelector
@@ -151,6 +149,11 @@ export const AddressInputGroup: React.FC<Props> = ({
             selectClassName="form-select"
             inputClassName="form-input"
             data-testid={`input_${fieldName}`}
+            selectPlaceholder={{
+              label: t(`addressForm.${fieldName}_placeholder`),
+              value: "",
+              disabled: true,
+            }}
             // @ts-expect-error missing
             states={states}
             name={fieldName}
@@ -159,23 +162,21 @@ export const AddressInputGroup: React.FC<Props> = ({
           <Label htmlFor={fieldName}>{label}</Label>
         </>
       )
-    } else {
-      return (
-        <>
-          <StyledAddressInput
-            id={fieldName}
-            required={required}
-            data-testid={`input_${fieldName}`}
-            name={fieldName}
-            type={type}
-            pattern={pattern}
-            value={value}
-            className="form-input"
-          />
-          <Label htmlFor={fieldName}>{label}</Label>
-        </>
-      )
     }
+    return (
+      <>
+        <StyledAddressInput
+          id={fieldName}
+          required={required}
+          data-testid={`input_${fieldName}`}
+          name={fieldName}
+          type={type}
+          value={value}
+          className="form-input"
+        />
+        <Label htmlFor={fieldName}>{label}</Label>
+      </>
+    )
   }
 
   return (

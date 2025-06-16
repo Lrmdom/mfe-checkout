@@ -1,3 +1,123 @@
+# [5.7.0](https://github.com/commercelayer/mfe-checkout/compare/v5.6.1...v5.7.0) (2025-06-11)
+
+
+### Features
+
+* allow thank you page with customer token even if order is approved ([3e7d227](https://github.com/commercelayer/mfe-checkout/commit/3e7d227b1fd5f1b463603a1af2a0a09570e5d71e))
+
+## [5.6.1](https://github.com/commercelayer/mfe-checkout/compare/v5.6.0...v5.6.1) (2025-06-03)
+
+
+### Bug Fixes
+
+* check order status on stripe dropin change to avoid delay on Apple Pay ([8a53ca6](https://github.com/commercelayer/mfe-checkout/commit/8a53ca617deac13c8be555a3d8b87866637588e3))
+
+# [5.6.0](https://github.com/commercelayer/mfe-checkout/compare/v5.5.0...v5.6.0) (2025-05-29)
+
+
+### Bug Fixes
+
+* avoid confirming a payment if order become `draft` during checkout ([f6e70dc](https://github.com/commercelayer/mfe-checkout/commit/f6e70dcaabd3869788d2ab9fc269ca0183371c41))
+* pnpm-lock.yaml ([d1cd8ba](https://github.com/commercelayer/mfe-checkout/commit/d1cd8ba80baa192983abf4d577dff8c0fce876a9))
+
+
+### Features
+
+* Add CKO styles ([637abb5](https://github.com/commercelayer/mfe-checkout/commit/637abb58fa2317e590f1969e5e9999c60028ed7e))
+* Update commercelayer react components to the latest version. Closes [#524](https://github.com/commercelayer/mfe-checkout/issues/524). ([90cb106](https://github.com/commercelayer/mfe-checkout/commit/90cb10649fd35ce3613f120b4edcc43f4f764e1b))
+
+# [5.5.0](https://github.com/commercelayer/mfe-checkout/compare/v5.4.0...v5.5.0) (2025-05-14)
+
+
+### Features
+
+* add organization slug support on config URLs ([bf3f3dd](https://github.com/commercelayer/mfe-checkout/commit/bf3f3dd11954a616a449e0b203fe08146d06eb35))
+
+# [5.4.0](https://github.com/commercelayer/mfe-checkout/compare/v5.3.0...v5.4.0) (2025-05-09)
+
+
+### Features
+
+* add support to order `token` attribute on organization config urls ([329a6d0](https://github.com/commercelayer/mfe-checkout/commit/329a6d09befae3d1a9d404358405a0cf6e2b2c52))
+
+# [5.3.0](https://github.com/commercelayer/mfe-checkout/compare/v5.2.0...v5.3.0) (2025-05-05)
+
+
+### Bug Fixes
+
+* remove contraints on customer address ([61a164e](https://github.com/commercelayer/mfe-checkout/commit/61a164e9c42744600ca85a08ceded314a921b3e1))
+
+
+### Features
+
+* Add Stripe Connected Account. Closes [#510](https://github.com/commercelayer/mfe-checkout/issues/510). ([de27ff1](https://github.com/commercelayer/mfe-checkout/commit/de27ff18c18dc5ccd42498f2bedbc464075e5675))
+
+# [5.2.0](https://github.com/commercelayer/mfe-checkout/compare/v5.1.0...v5.2.0) (2025-03-18)
+
+
+### Bug Fixes
+
+* add translated placeholder to state/province select and upgrade dependencies ([118cb83](https://github.com/commercelayer/mfe-checkout/commit/118cb8321613a37ee499c497daca11c4f7586e76))
+
+
+### Features
+
+* refine Italian translations and add placing translations ([1cd7a46](https://github.com/commercelayer/mfe-checkout/commit/1cd7a46eda320007a3ab95539f7533247b121218))
+
+# [5.1.0](https://github.com/commercelayer/mfe-checkout/compare/v5.0.1...v5.1.0) (2025-02-25)
+
+
+### Bug Fixes
+
+* change wire transfer to manual payment ([f1a18c5](https://github.com/commercelayer/mfe-checkout/commit/f1a18c5e1bb59003f343931f8501ef71c6359212))
+* replace slug on cart url with organization ([86ce969](https://github.com/commercelayer/mfe-checkout/commit/86ce9697937f42c010a49304a896327c376c7768))
+
+
+### Features
+
+* add optional billing info ([ddddaef](https://github.com/commercelayer/mfe-checkout/commit/ddddaef3b15e8752d5aa9558aeb8bf4674f7d9b2))
+
+## [5.0.1](https://github.com/commercelayer/mfe-checkout/compare/v5.0.0...v5.0.1) (2025-02-18)
+
+
+### Bug Fixes
+
+* adjust input styles to support new adyen dropin ([0e94070](https://github.com/commercelayer/mfe-checkout/commit/0e940703a241873d9bdf1b40b833060b6a97285c))
+
+# [5.0.0](https://github.com/commercelayer/mfe-checkout/compare/v4.13.0...v5.0.0) (2025-02-18)
+
+
+### Performance Improvements
+
+* replace eslint with biome ([dad7f74](https://github.com/commercelayer/mfe-checkout/commit/dad7f74b3f2ed4013e06688fb71f97ad5cd16a00))
+
+
+### BREAKING CHANGES
+
+* we decided to replace eslint and prettier with biome. No new feature, just syntax changes
+
+# [4.13.0](https://github.com/commercelayer/mfe-checkout/compare/v4.12.1...v4.13.0) (2025-02-18)
+
+
+### Features
+
+* upgrade to next v15.1.6 ([40ffb35](https://github.com/commercelayer/mfe-checkout/commit/40ffb35f237acfe64bd8ab443d1d8c26f119df8d))
+
+## [4.12.1](https://github.com/commercelayer/mfe-checkout/compare/v4.12.0...v4.12.1) (2024-11-21)
+
+
+### Bug Fixes
+
+* address vulnerability on dependencies ([c790678](https://github.com/commercelayer/mfe-checkout/commit/c790678be0e9960544ca4457dd36ad33fd6fe6ab))
+
+# [4.12.0](https://github.com/commercelayer/mfe-checkout/compare/v4.11.3...v4.12.0) (2024-11-14)
+
+
+### Features
+
+* upgrade dependencies ([93fceac](https://github.com/commercelayer/mfe-checkout/commit/93fceace252b2288a70938fc9b5a61418c0c57c5))
+* upgrade to nextjs 15 ([380e7d3](https://github.com/commercelayer/mfe-checkout/commit/380e7d303bd92837d268cc903c0bcdacf543e932))
+
 ## [4.11.3](https://github.com/commercelayer/mfe-checkout/compare/v4.11.2...v4.11.3) (2024-10-10)
 
 

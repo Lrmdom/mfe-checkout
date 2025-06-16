@@ -11,18 +11,18 @@ import { Label } from "components/ui/Label"
 import { SpinnerIcon } from "components/ui/SpinnerIcon"
 
 import { ErrorIcon } from "./ErrorIcon"
+import { WarningIcon } from "./WarningIcon"
 import { messages } from "./messages"
 import {
   ErrorIco,
   ErrorMessage,
-  ErrorsContainer,
   ErrorWrapper,
+  ErrorsContainer,
+  PlaceOrderButtonWrapper,
   StyledErrors,
   StyledPlaceOrderButton,
   StyledPrivacyAndTermsCheckbox,
-  PlaceOrderButtonWrapper,
 } from "./styled"
-import { WarningIcon } from "./WarningIcon"
 
 interface Props {
   isActive: boolean
@@ -94,12 +94,9 @@ const StepPlaceOrder: React.FC<Props> = ({
       <ErrorsContainer data-testid="errors-container">
         <StyledErrors
           resource="orders"
-          messages={
-            messages &&
-            messages.map((msg) => {
-              return { ...msg, message: t(msg.message) }
-            })
-          }
+          messages={messages?.map((msg) => {
+            return { ...msg, message: t(msg.message) }
+          })}
         >
           {(props) => {
             if (props.errors?.length === 0) {
@@ -156,6 +153,7 @@ const StepPlaceOrder: React.FC<Props> = ({
             data-testid="save-payment-button"
             isActive={isActive}
             onClick={handlePlaceOrder}
+            loadingLabel={t("stepPayment.submitting")}
             label={
               <>
                 {isPlacingOrder && <SpinnerIcon />}

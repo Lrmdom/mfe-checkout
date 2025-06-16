@@ -13,7 +13,6 @@ let nextConfig = {
   output: process.env.NODE_ENV === "production" ? "export" : "standalone",
   distDir: "out/dist",
   poweredByHeader: false,
-  swcMinify: false,
   webpack: (config) => {
     return config
   },

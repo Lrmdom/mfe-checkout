@@ -1,12 +1,12 @@
 import "@adyen/adyen-web/styles/adyen.css"
 import {
-  PaymentSourceBrandName,
-  PaymentSourceDetail,
+  type PaymentMethodOnClickParams,
   PaymentSource,
   PaymentSourceBrandIcon,
-  PaymentMethodOnClickParams,
+  PaymentSourceBrandName,
+  PaymentSourceDetail,
 } from "@commercelayer/react-components"
-import { PaymentMethod as PaymentMethodType } from "@commercelayer/sdk"
+import type { PaymentMethod as PaymentMethodType } from "@commercelayer/sdk"
 import classNames from "classnames"
 import { useContext, useEffect, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -30,14 +30,13 @@ interface HeaderProps {
 export const StepHeaderPayment: React.FC<HeaderProps> = ({ step }) => {
   const appCtx = useContext(AppContext)
   const accordionCtx = useContext(AccordionContext)
+  const { t } = useTranslation()
 
   if (!appCtx || !accordionCtx) {
     return null
   }
 
   const { hasPaymentMethod, isPaymentRequired, isCreditCard } = appCtx
-
-  const { t } = useTranslation()
 
   const recapText = () => {
     if (!isPaymentRequired) {
@@ -92,12 +91,6 @@ export const StepPayment: React.FC = () => {
 
   const { t } = useTranslation()
 
-  // if (!appCtx || !appCtx.hasShippingMethod) {
-  // this exit on shippingMethod is causing an error in useEffect to enable button
-  if (!appCtx || !accordionCtx) {
-    return null
-  }
-
   useEffect(() => {
     // If single payment methods and has multiple payment methods, we hide the label of the box
     if (autoSelected && hasMultiplePaymentMethods) {
@@ -105,13 +98,18 @@ export const StepPayment: React.FC = () => {
     }
   }, [autoSelected, hasMultiplePaymentMethods])
 
+  // if (!appCtx || !appCtx.hasShippingMethod) {
+  // this exit on shippingMethod is causing an error in useEffect to enable button
+  if (!appCtx || !accordionCtx) {
+    return null
+  }
+
   const { isGuest, isPaymentRequired, setPayment, hasSubscriptions } = appCtx
 
   const selectPayment = ({ payment, order }: PaymentMethodOnClickParams) => {
     if (
-      order?.payment_source &&
       // @ts-expect-error available only on adyen
-      order?.payment_source.payment_methods &&
+      order?.payment_source?.payment_methods &&
       // @ts-expect-error available only on adyen
       order?.payment_source?.payment_methods?.length > 1
     ) {

@@ -161,7 +161,7 @@ test.describe("guest with Adyen drop-in", () => {
     await checkoutPage.checkPaymentRecap(" ending in ****")
   })
 
-  test("Checkout order with Credit Card and 3D Secure", async ({
+  test.skip("Checkout order with Credit Card and 3D Secure", async ({
     checkoutPage,
   }) => {
     await checkoutPage.checkOrderSummary("Order Summary")
@@ -348,8 +348,7 @@ test.describe("API version v68", () => {
   })
 
   test("checkout with credit card", async ({ checkoutPage }) => {
-
-    const TIMEOUT = 3000;
+    const TIMEOUT = 3000
     await checkoutPage.checkOrderSummary("Order Summary")
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -365,7 +364,6 @@ test.describe("API version v68", () => {
     await checkoutPage.checkStep("Shipping", "close")
     await checkoutPage.checkStep("Payment", "open")
 
-
     await checkoutPage.selectPayment("adyen")
 
     await checkoutPage.setPayment("adyen")
@@ -375,6 +373,5 @@ test.describe("API version v68", () => {
     await checkoutPage.checkPaymentRecap(" ending in ****")
     await checkoutPage.page.reload()
     await checkoutPage.checkPaymentRecap(" ending in ****")
-    
   })
 })

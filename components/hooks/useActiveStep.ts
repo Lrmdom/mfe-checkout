@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react"
+import { useContext, useEffect, useState } from "react"
 
 import { AppContext } from "components/data/AppProvider"
 
@@ -15,7 +15,7 @@ const STEPS: SingleStepEnum[] = ["Customer", "Shipping", "Payment"]
 export function checkIfCannotGoNext(
   step: SingleStepEnum,
   steps: SingleStepEnum[],
-  lastActivableStep: SingleStepEnum
+  lastActivableStep: SingleStepEnum,
 ) {
   if (lastActivableStep === "Complete") {
     return false
@@ -33,20 +33,12 @@ export const useActiveStep = (): UseActiveStep => {
 
   const ctx = useContext(AppContext)
 
-  if (!ctx)
-    return {
-      activeStep,
-      lastActivableStep,
-      setActiveStep,
-      isLoading: true,
-      steps,
-    }
-
-  const { isFirstLoading, isLoading } = ctx
+  const isLoading = ctx?.isLoading ?? true
+  const isFirstLoading = ctx?.isFirstLoading ?? true
 
   useEffect(() => {
     if (ctx && (isFirstLoading || !ctx.isLoading)) {
-      // Use it to alter steps of checkout
+      // Alter steps of checkout
       if (ctx.isShipmentRequired) {
         setSteps(["Customer", "Shipping", "Payment"])
       } else {
@@ -71,6 +63,7 @@ export const useActiveStep = (): UseActiveStep => {
         canSelectShippingMethod &&
         canSelectPayment &&
         ctx.hasPaymentMethod
+
       if (canPlaceOrder) {
         setActiveStep("Complete")
         setLastActivableStep("Complete")

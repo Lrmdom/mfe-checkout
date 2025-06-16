@@ -1,14 +1,14 @@
 import { jwtDecode, jwtIsSalesChannel } from "@commercelayer/js-auth"
-import { getConfig } from "@commercelayer/organization-config"
+import { getMfeConfig } from "@commercelayer/organization-config"
 import CommerceLayer, {
   CommerceLayerStatic,
-  CommerceLayerClient,
-  Organization,
-  Order,
+  type CommerceLayerClient,
+  type Organization,
+  type Order,
 } from "@commercelayer/sdk"
 import retry from "async-retry"
 
-import { TypeAccepted } from "components/data/AppProvider/utils"
+import type { TypeAccepted } from "components/data/AppProvider/utils"
 import {
   LINE_ITEMS_SHIPPABLE,
   LINE_ITEMS_SHOPPABLE,
@@ -27,7 +27,7 @@ function isProduction(): boolean {
 }
 
 async function retryCall<T>(
-  f: () => Promise<T>
+  f: () => Promise<T>,
 ): Promise<FetchResource<T> | undefined> {
   return await retry(
     async (bail, number) => {
@@ -59,17 +59,17 @@ async function retryCall<T>(
     },
     {
       retries: RETRIES,
-    }
+    },
   )
 }
 
 function getOrganization(
-  cl: CommerceLayerClient
+  cl: CommerceLayerClient,
 ): Promise<FetchResource<Organization> | undefined> {
   return retryCall<Organization>(() =>
     cl.organization.retrieve({
       fields: {
-        organization: [
+        organizations: [
           "id",
           "logo_url",
           "name",
@@ -82,13 +82,13 @@ function getOrganization(
           "config",
         ],
       },
-    })
+    }),
   )
 }
 
 function getOrder(
   cl: CommerceLayerClient,
-  orderId: string
+  orderId: string,
 ): Promise<FetchResource<Order> | undefined> {
   return retryCall<Order>(() =>
     cl.orders.retrieve(orderId, {
@@ -99,15 +99,18 @@ function getOrder(
           "status",
           "number",
           "guest",
+          "token",
           "language_code",
           "terms_url",
           "privacy_url",
           "line_items",
+          "customer",
+          "payment_status",
         ],
         line_items: ["item_type", "item"],
       },
-      include: ["line_items", "line_items.item"],
-    })
+      include: ["line_items", "line_items.item", "customer"],
+    }),
   )
 }
 
@@ -127,6 +130,7 @@ function getTokenInfo(accessToken: string) {
         kind,
         isTest: test,
         isGuest: !owner,
+        owner,
         marketId: payload.market?.id[0],
       }
     } else {
@@ -166,7 +170,8 @@ export const getSettings = async ({
     return invalidateCheckout()
   }
 
-  const { slug, kind, isTest, isGuest, marketId } = getTokenInfo(accessToken)
+  const { slug, kind, isTest, isGuest, owner, marketId } =
+    getTokenInfo(accessToken)
 
   if (!slug) {
     return invalidateCheckout()
@@ -218,7 +223,7 @@ export const getSettings = async ({
       LINE_ITEMS_SHIPPABLE.includes(line_item.item_type as TypeAccepted) &&
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      !line_item.item?.do_not_ship
+      !line_item.item?.do_not_ship,
   )
 
   if (order.status === "draft" || order.status === "pending") {
@@ -235,7 +240,12 @@ export const getSettings = async ({
         console.log("error refreshing order")
       }
     }
-  } else if (order.status !== "placed") {
+  } else if (
+    order.status !== "placed" &&
+    // Invalid if status not placed with guest token or if the order is not owned by the customer
+    // Latest check is done by the API, but just to reinforce it here
+    (isGuest || owner?.id !== order.customer?.id)
+  ) {
     return invalidateCheckout()
   }
 
@@ -261,12 +271,14 @@ export const getSettings = async ({
     supportPhone: organization.support_phone,
     termsUrl: order.terms_url,
     privacyUrl: order.privacy_url,
-    config: getConfig({
+    config: getMfeConfig({
       jsonConfig: organization.config ?? {},
       market: `market:id:${marketId}`,
       params: {
         lang: order.language_code,
         orderId: order.id,
+        token: order.token,
+        slug: slug,
         accessToken,
       },
     }),

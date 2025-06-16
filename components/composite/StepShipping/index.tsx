@@ -1,4 +1,4 @@
-import Errors from "@commercelayer/react-components/errors/Errors"
+import type Errors from "@commercelayer/react-components/errors/Errors"
 import LineItem from "@commercelayer/react-components/line_items/LineItem"
 import LineItemImage from "@commercelayer/react-components/line_items/LineItemImage"
 import LineItemName from "@commercelayer/react-components/line_items/LineItemName"
@@ -18,12 +18,12 @@ import type {
   ShippingMethod as ShippingMethodCollection,
 } from "@commercelayer/sdk"
 import classNames from "classnames"
-import { useTranslation, Trans } from "next-i18next"
-import { useContext, useState, useEffect } from "react"
+import { Trans, useTranslation } from "next-i18next"
+import { useCallback, useContext, useEffect, useMemo, useState } from "react"
 
 import { AccordionContext } from "components/data/AccordionProvider"
 import { AppContext } from "components/data/AppProvider"
-import { TypeAccepted } from "components/data/AppProvider/utils"
+import type { TypeAccepted } from "components/data/AppProvider/utils"
 import { GTMContext } from "components/data/GTMProvider"
 import { Button, ButtonWrapper } from "components/ui/Button"
 import { GridContainer } from "components/ui/GridContainer"
@@ -36,15 +36,15 @@ import { LINE_ITEMS_SHIPPABLE } from "components/utils/constants"
 import { NoShippingMethods } from "./Errors/NoShippingMethods"
 import { OutOfStock } from "./Errors/OutOfStock"
 import {
-  ShippingWrapper,
-  ShippingTitle,
+  ShippingLineItem,
+  ShippingLineItemDescription,
+  ShippingLineItemQty,
+  ShippingLineItemTitle,
   ShippingSummary,
   ShippingSummaryItemDescription,
   ShippingSummaryValue,
-  ShippingLineItem,
-  ShippingLineItemDescription,
-  ShippingLineItemTitle,
-  ShippingLineItemQty,
+  ShippingTitle,
+  ShippingWrapper,
   StyledShippingMethodRadioButton,
 } from "./styled"
 
@@ -60,16 +60,17 @@ interface HeaderProps {
 }
 
 export const StepHeaderShipping: React.FC<HeaderProps> = ({ step }) => {
+  const { t } = useTranslation()
   const appCtx = useContext(AppContext)
   const accordionCtx = useContext(AccordionContext)
 
-  if (!appCtx || !accordionCtx) {
-    return null
-  }
-  const { t } = useTranslation()
-  const { hasShippingMethod, isShipmentRequired, shipments } = appCtx
+  const recapText = useMemo(() => {
+    if (!appCtx || !accordionCtx) {
+      return ""
+    }
 
-  const recapText = () => {
+    const { hasShippingMethod, isShipmentRequired, shipments } = appCtx
+
     if (!isShipmentRequired) {
       return t("stepShipping.notRequired")
     }
@@ -81,9 +82,12 @@ export const StepHeaderShipping: React.FC<HeaderProps> = ({ step }) => {
         return appCtx.shippingMethodName
       }
       return t("stepShipping.methodSelected", { count: shipments.length })
-    } else {
-      return t("stepShipping.methodUnselected")
     }
+    return t("stepShipping.methodUnselected")
+  }, [appCtx, accordionCtx, t])
+
+  if (!appCtx || !accordionCtx) {
+    return null
   }
 
   return (
@@ -91,8 +95,10 @@ export const StepHeaderShipping: React.FC<HeaderProps> = ({ step }) => {
       stepNumber={step}
       status={accordionCtx.status}
       label={t("stepShipping.title")}
-      info={recapText()}
-      onEditRequest={isShipmentRequired ? accordionCtx.setStep : undefined}
+      info={recapText}
+      onEditRequest={
+        appCtx.isShipmentRequired ? accordionCtx.setStep : undefined
+      }
     />
   )
 }
@@ -105,9 +111,10 @@ export const StepShipping: React.FC<Props> = () => {
   const gtmCtx = useContext(GTMContext)
   const { t } = useTranslation()
 
-  if (!appCtx || !accordionCtx) {
-    return null
-  }
+  const [canContinue, setCanContinue] = useState(false)
+  const [isLocalLoader, setIsLocalLoader] = useState(false)
+  const [outOfStockError, setOutOfStockError] = useState(false)
+  const [shippingMethodError, setShippingMethodError] = useState(false)
 
   const messages: Parameters<typeof Errors>[0]["messages"] = [
     {
@@ -122,28 +129,23 @@ export const StepShipping: React.FC<Props> = () => {
     },
   ]
 
-  const { shipments, isShipmentRequired, saveShipments, selectShipment } =
-    appCtx
-
-  const [canContinue, setCanContinue] = useState(false)
-  const [isLocalLoader, setIsLocalLoader] = useState(false)
-  const [outOfStockError, setOutOfStockError] = useState(false)
-  const [shippingMethodError, setShippingMethodError] = useState(false)
-
   useEffect(() => {
+    if (!appCtx) return
+    const { shipments } = appCtx
     if (shipments.length > 0) {
       setCanContinue(
-        !shipments?.map((s) => s.shippingMethodId).includes(undefined)
+        !shipments?.map((s) => s.shippingMethodId).includes(undefined),
       )
     }
-  }, [shipments])
+  }, [appCtx])
 
   const handleChange = (params: {
     shippingMethod: ShippingMethodCollection
     shipmentId: string
     order?: Order
   }): void => {
-    selectShipment({
+    if (!appCtx) return
+    appCtx.selectShipment({
       shippingMethod: params.shippingMethod,
       shipmentId: params.shipmentId,
       order: params.order,
@@ -151,21 +153,38 @@ export const StepShipping: React.FC<Props> = () => {
   }
 
   const handleSave = async () => {
+
+    if (!appCtx) return
+
     setIsLocalLoader(true)
 
-    const updatedOrder = await saveShipments()
+    const updatedOrder = await appCtx.saveShipments()
 
     setIsLocalLoader(false)
     if (gtmCtx?.fireAddShippingInfo) {
-      await gtmCtx.fireAddShippingInfo(updatedOrder)
+      gtmCtx.fireAddShippingInfo(updatedOrder)
     }
   }
 
   const autoSelectCallback = async (order?: Order) => {
+
+    if (!appCtx) return
+
     const updatedOrder = await appCtx.autoSelectShippingMethod(order)
     if (gtmCtx?.fireAddShippingInfo) {
-      await gtmCtx.fireAddShippingInfo(updatedOrder)
+      gtmCtx.fireAddShippingInfo(updatedOrder)
     }
+  }
+
+  if (!appCtx || !accordionCtx) {
+    return null
+  }
+
+  const { isShipmentRequired, shipments } = appCtx
+
+  // Render nothing if shipping is not required
+  if (!isShipmentRequired) {
+    return null
   }
 
   return (
@@ -212,7 +231,7 @@ export const StepShipping: React.FC<Props> = () => {
                                     {(props) => {
                                       const index = shipments.findIndex(
                                         (item) =>
-                                          item.shipmentId === props.shipment.id
+                                          item.shipmentId === props.shipment.id,
                                       )
 
                                       return (
@@ -253,7 +272,7 @@ export const StepShipping: React.FC<Props> = () => {
                                           props?.deliveryLeadTimeForShipment
                                         return (
                                           <label
-                                            className="flex flex-col p-3 border rounded cursor-pointer hover:border-primary transition duration-200 ease-in peer-checked:border-2 peer-checked:border-primary peer-checked:shadow-md peer-checked:bg-gray-50"
+                                            className="flex flex-col p-3 border rounded cursor-pointer hover:border-gray-400 transition duration-200 ease-in peer-checked:border-2 peer-checked:border-primary peer-checked:shadow-md peer-checked:bg-gray-50"
                                             htmlFor={props.htmlFor}
                                           >
                                             <ShippingLineItemTitle>
@@ -281,10 +300,10 @@ export const StepShipping: React.FC<Props> = () => {
                                               <ShippingMethodPrice
                                                 data-testid="shipping-method-price"
                                                 labelFreeOver={t(
-                                                  "general.free"
+                                                  "general.free",
                                                 )}
                                                 labelExternal={t(
-                                                  "stepShipping.externalPrice"
+                                                  "stepShipping.externalPrice",
                                                 )}
                                               />
                                             </ShippingSummaryValue>

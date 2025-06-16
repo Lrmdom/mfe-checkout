@@ -1,10 +1,10 @@
 import PaymentMethod, {
-  PaymentMethodOnClickParams,
+  type PaymentMethodOnClickParams,
 } from "@commercelayer/react-components/payment_methods/PaymentMethod"
 import PaymentSource, {
-  CustomerSaveToWalletProps,
+  type CustomerSaveToWalletProps,
 } from "@commercelayer/react-components/payment_source/PaymentSource"
-import { MouseEvent, useState } from "react"
+import { type MouseEvent, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Label } from "components/ui/Label"
@@ -13,9 +13,9 @@ import { PaymentDetails } from "./PaymentDetails"
 import { PaymentSkeleton } from "./PaymentSkeleton"
 import { PaymentSummaryList } from "./PaymentSummaryList"
 import {
-  PaymentWrapper,
-  PaymentSourceContainer,
   PaymentDetailsWrapper,
+  PaymentSourceContainer,
+  PaymentWrapper,
   WalletCheckbox,
 } from "./styled"
 
@@ -53,7 +53,7 @@ export const CheckoutCustomerPayment: React.FC<Props> = ({
               key={k}
               data-testid="customer-card"
               onClick={p.handleClick}
-              className="flex flex-col items-start p-3 mb-4 text-sm border rounded cursor-pointer lg:flex-row lg:items-center shadow-sm hover:border-primary"
+              className="flex flex-col items-start p-3 mb-4 text-sm border rounded cursor-pointer lg:flex-row lg:items-center shadow-sm hover:border-gray-400"
             >
               <PaymentSourceProvider value={{ ...p.card }}>
                 <PaymentDetails />
@@ -69,7 +69,7 @@ export const CheckoutCustomerPayment: React.FC<Props> = ({
     name,
   }: CustomerSaveToWalletProps) => {
     const handleClick = (
-      e: MouseEvent<HTMLInputElement, globalThis.MouseEvent>
+      e: MouseEvent<HTMLInputElement, globalThis.MouseEvent>,
     ) => e?.stopPropagation()
     const handleChange = () => {
       setChecked(!checked)

@@ -6,13 +6,19 @@ import ShippingAddressContainer from "@commercelayer/react-components/addresses/
 import ShippingAddressForm from "@commercelayer/react-components/addresses/ShippingAddressForm"
 import type { Address, Order } from "@commercelayer/sdk"
 import { Transition } from "@headlessui/react"
-import { useState, Fragment, useEffect, Dispatch, SetStateAction } from "react"
+import {
+  type Dispatch,
+  Fragment,
+  type SetStateAction,
+  useEffect,
+  useState,
+} from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 
 import {
+  type ShippingToggleProps,
   evaluateShippingToggle,
-  ShippingToggleProps,
 } from "components/composite/StepCustomer"
 import { AddButton } from "components/ui/AddButton"
 import { ButtonCss, ButtonWrapper } from "components/ui/Button"
@@ -72,19 +78,19 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
     useState(shippingAddress)
 
   const [showBillingAddressForm, setShowBillingAddressForm] = useState<boolean>(
-    isUsingNewBillingAddress
+    isUsingNewBillingAddress,
   )
 
   const [mountBillingAddressForm, setMountBillingAddressForm] = useState(
-    isUsingNewBillingAddress
+    isUsingNewBillingAddress,
   )
 
   const [showShippingAddressForm, setShowShippingAddressForm] = useState(
-    isUsingNewShippingAddress
+    isUsingNewShippingAddress,
   )
 
   const [mountShippingAddressForm, setMountShippingAddressForm] = useState(
-    isUsingNewShippingAddress
+    isUsingNewShippingAddress,
   )
 
   useEffect(() => {
@@ -136,13 +142,13 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
         evaluateShippingToggle({
           countryCode: address.country_code,
           shippingCountryCodeLock,
-        })
+        }),
       )
     }
 
     localStorage.setItem(
       "_save_billing_address_to_customer_address_book",
-      "false"
+      "false",
     )
   }
 
@@ -151,13 +157,14 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
       <AddressSectionEmail readonly emailAddress={emailAddress as string} />
       <AddressesContainer shipToDifferentAddress={shipToDifferentAddress}>
         <AddressSectionTitle data-testid="billing-address">
-          <>{t(`addressForm.billing_address_title`)}</>
+          <>{t("addressForm.billing_address_title")}</>
         </AddressSectionTitle>
         <div className="relative">
           <>
             {hasCustomerAddresses && (
               <>
                 <Transition
+                  as="div"
                   show={!showBillingAddressForm}
                   {...addressesTransition}
                 >
@@ -183,6 +190,7 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
           </>
           <div className="top-0 mt-4">
             <Transition
+              as="div"
               show={showBillingAddressForm}
               beforeEnter={() => setMountBillingAddressForm(true)}
               afterLeave={() => setMountBillingAddressForm(false)}
@@ -218,13 +226,13 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
               disabled={disabledShipToDifferentAddress}
               data-testid="button-ship-to-different-address"
               data-status={shipToDifferentAddress}
-              label={t(`addressForm.ship_to_different_address`)}
+              label={t("addressForm.ship_to_different_address")}
               checked={shipToDifferentAddress}
               onChange={handleToggle}
             />
             <div className={`${shipToDifferentAddress ? "" : "hidden"} mb-2`}>
               <AddressSectionTitle data-testid="shipping-address">
-                <>{t(`addressForm.shipping_address_title`)}</>
+                <>{t("addressForm.shipping_address_title")}</>
               </AddressSectionTitle>
             </div>
             <div
@@ -236,6 +244,7 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
             >
               <Transition
                 show={!showShippingAddressForm}
+                as="div"
                 {...addressesTransition}
               >
                 <GridContainer className="mb-4">
@@ -246,7 +255,7 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
                       onSelect={() =>
                         localStorage.setItem(
                           "_save_shipping_address_to_customer_address_book",
-                          "false"
+                          "false",
                         )
                       }
                     />
@@ -263,6 +272,7 @@ export const CheckoutCustomerAddresses: React.FC<Props> = ({
             </div>
             <div className="mt-4">
               <Transition
+                as="div"
                 show={showShippingAddressForm}
                 beforeEnter={() => setMountShippingAddressForm(true)}
                 beforeLeave={() => setMountShippingAddressForm(false)}

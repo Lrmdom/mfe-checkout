@@ -1,20 +1,20 @@
 import {
-  createAssertion,
   authenticate,
+  createAssertion,
   jwtDecode,
   jwtIsSalesChannel,
 } from "@commercelayer/js-auth"
-import { type Configs } from "@commercelayer/organization-config"
+import type { MfeConfigs } from "@commercelayer/organization-config"
 import {
+  type Address,
+  type AddressCreate,
   CommerceLayer,
-  CommerceLayerClient,
-  Address,
-  AddressCreate,
+  type CommerceLayerClient,
 } from "@commercelayer/sdk"
 import { test as base } from "@playwright/test"
 import dotenv from "dotenv"
 
-import path from "path"
+import path from "node:path"
 
 import { CheckoutPage } from "./CheckoutPage"
 
@@ -28,6 +28,8 @@ type OrderType =
   | "digital"
   | "gift-card"
   | "with-items"
+
+type ValidMarket = "EU" | "US" | "MI" | "MT" | "IT" | "IE" | "LP" | "UY" | "VV"
 
 interface BaseLineItemObject {
   quantity: number
@@ -59,7 +61,7 @@ interface DefaultParamsProps {
   token?: string
   orderId?: string
   order?: OrderType
-  market?: "EU" | "US" | "MI"
+  market?: ValidMarket
   customer?: {
     email: string
     password: string
@@ -68,7 +70,7 @@ interface DefaultParamsProps {
     support_phone?: string
     support_email?: string
     gtm_id_test?: string
-    config?: { mfe: Configs }
+    config?: { mfe: MfeConfigs }
   }
   orderAttributes?: {
     language_code?: "en" | "it" | "it-IT"
@@ -98,7 +100,7 @@ type FixtureType = {
   defaultParams: DefaultParamsProps
 }
 
-const getToken = async (market?: "US" | "EU" | "MI", customerId?: string) => {
+const getToken = async (market?: ValidMarket, customerId?: string) => {
   const scope = market != null ? `market:code:${market}` : "market:code:EU"
 
   if (customerId == null) {
@@ -134,9 +136,11 @@ const getToken = async (market?: "US" | "EU" | "MI", customerId?: string) => {
 const getCustomerUserToken = async ({
   email,
   password,
+  market = "EU",
 }: {
   email: string
   password: string
+  market?: ValidMarket
 }) => {
   const token = await getSuperToken()
   const cl = getClient(token)
@@ -153,7 +157,7 @@ const getCustomerUserToken = async ({
     customerId = existingUser[0].id
   }
 
-  const scope = "EU"
+  const scope = market
 
   return getToken(scope, customerId)
 }
@@ -170,14 +174,13 @@ const getSuperToken = async () => {
 
 const getOrder = async (
   cl: CommerceLayerClient,
-  params: DefaultParamsProps
+  params: DefaultParamsProps,
 ) => {
   const email = params.customer?.email || params.orderAttributes?.customer_email
   const attributes = {
     ...params.orderAttributes,
     customer_email: email,
   }
-
   const giftCard = params.giftCardAttributes
   const order = await cl.orders.create(attributes)
   let giftCardCode
@@ -192,7 +195,7 @@ const getOrder = async (
       const noStock =
         (params.lineItemsAttributes?.length || 0) > 0 &&
         (params.lineItemsAttributes?.filter(
-          ({ inventory }) => inventory !== undefined && inventory >= 0
+          ({ inventory }) => inventory !== undefined && inventory >= 0,
         ) as SkuItem[])
 
       if (noStock && noStock.length > 0) {
@@ -238,7 +241,7 @@ const getOrder = async (
         const { billingAddress, shippingAddress, sameShippingAddress } =
           params.addresses
         const addressToAttach = await cl.addresses.create(
-          billingAddress as AddressCreate
+          billingAddress as AddressCreate,
         )
         await cl.orders.update({
           id: order.id,
@@ -247,7 +250,7 @@ const getOrder = async (
         })
         if (!sameShippingAddress && shippingAddress) {
           const addressToAttach = await cl.addresses.create(
-            shippingAddress as AddressCreate
+            shippingAddress as AddressCreate,
           )
           await cl.orders.update({
             id: order.id,
@@ -263,6 +266,7 @@ const getOrder = async (
         const token = await getCustomerUserToken({
           email: params.customer.email,
           password: params.customer.password,
+          market: params.market,
         })
         const customerCl = getClient(token)
         const { payload } = jwtDecode(token)
@@ -275,7 +279,7 @@ const getOrder = async (
             // @ts-expect-error no customer_email needed
             const ca = await customerCl.customer_addresses.create({
               customer: customerCl.customers.relationship(
-                payload.owner?.id as string
+                payload.owner?.id as string,
               ),
               address: customerCl.addresses.relationship(a),
             })
@@ -349,6 +353,7 @@ const getOrder = async (
   }
   return {
     orderId: order.id,
+    orderToken: order.token,
     attributes: {
       giftCard: giftCardCode,
       organization: { ...params.organization },
@@ -359,7 +364,7 @@ const getOrder = async (
 const updateInventory = async (
   cl: CommerceLayerClient,
   lineItems: SkuItem[],
-  quantity: "quantity" | "inventory"
+  quantity: "quantity" | "inventory",
 ) => {
   const skus = await cl.skus.list({
     include: ["stock_items"],
@@ -368,7 +373,7 @@ const updateInventory = async (
     },
   })
   const promises = skus.map((sku) => {
-    if (sku && sku.stock_items) {
+    if (sku?.stock_items) {
       const lineItem = lineItems.find((li) => li.sku_code === sku.code)
       if (lineItem) {
         return cl.stock_items.update({
@@ -385,7 +390,7 @@ const updateInventory = async (
 const createAndPurchaseGiftCard = async (
   cl: CommerceLayerClient,
   props?: GiftCardProps,
-  purchase: boolean = false
+  purchase = false,
 ) => {
   const card = await cl.gift_cards.create({
     currency_code: props?.currency_code ? props.currency_code : "EUR",
@@ -407,6 +412,11 @@ const getClient = (token: string) => {
     accessToken: token,
     domain: process.env.NEXT_PUBLIC_DOMAIN,
   })
+}
+
+export const getSuperClient = async () => {
+  const token = await getSuperToken()
+  return getClient(token)
 }
 
 const createLineItems = async ({
@@ -435,7 +445,7 @@ const createLineItems = async ({
     const sku_options = await cl.sku_options.list()
     if (sku_options && sku_options.length === 0) return
     const lineItemsOptions = items.map((item, index) => {
-      if (item.sku_options && item.sku_options.length) {
+      if (item?.sku_options?.length) {
         return item.sku_options.map((sku_option) => {
           const option = sku_options.find((so) => so.name === sku_option.name)
           if (option) {
@@ -453,7 +463,7 @@ const createLineItems = async ({
     })
 
     await Promise.all(
-      lineItemsOptions.filter((item) => item !== undefined).flat(2)
+      lineItemsOptions.filter((item) => item !== undefined).flat(2),
     )
 
     // update line_items with final_quantity
@@ -464,7 +474,7 @@ const createLineItems = async ({
         item.final_quantity > 0
       ) {
         const toUpdate = lineItemsCreated.find(
-          (i) => i.sku_code === item.sku_code
+          (i) => i.sku_code === item.sku_code,
         )
         if (toUpdate) {
           return cl.line_items.update({
@@ -487,7 +497,7 @@ function isSkuItem(item: SkuItem | BundleItem): item is SkuItem {
 
 const createDefaultLineItem = async (
   cl: CommerceLayerClient,
-  orderId: string
+  orderId: string,
 ) => {
   const sku = (await cl.skus.list()).first()
 
@@ -504,11 +514,18 @@ export const test = base.extend<FixtureType>({
   defaultParams: { order: "plain" },
   checkoutPage: async ({ page, defaultParams }, use) => {
     const token = await (defaultParams.customer
-      ? getCustomerUserToken(defaultParams.customer)
+      ? getCustomerUserToken({
+          ...defaultParams.customer,
+          market: defaultParams.market,
+        })
       : getToken(defaultParams.market))
 
     const cl = getClient(token)
-    const { orderId, attributes } = await getOrder(cl, defaultParams)
+    const { orderId, orderToken, attributes } = await getOrder(
+      cl,
+      defaultParams,
+    )
+
     const id =
       defaultParams.orderId === undefined ? orderId : defaultParams.orderId
     const accessToken =
@@ -518,6 +535,7 @@ export const test = base.extend<FixtureType>({
       ...attributes,
       accessToken,
       orderId: id,
+      orderToken: orderToken,
     })
 
     await checkoutPage.goto({

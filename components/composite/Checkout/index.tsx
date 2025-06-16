@@ -16,14 +16,14 @@ import {
 } from "components/composite/StepCustomer"
 import { StepNav } from "components/composite/StepNav"
 import {
-  StepPayment,
   StepHeaderPayment,
+  StepPayment,
 } from "components/composite/StepPayment"
 import { PaymentContainer } from "components/composite/StepPayment/PaymentContainer"
 import StepPlaceOrder from "components/composite/StepPlaceOrder"
 import {
-  StepShipping,
   StepHeaderShipping,
+  StepShipping,
 } from "components/composite/StepShipping"
 import { AccordionProvider } from "components/data/AccordionProvider"
 import { AppContext } from "components/data/AppProvider"
@@ -64,7 +64,7 @@ const Checkout: React.FC<Props> = ({
   let paypalPayerId = ""
   let checkoutComSession = ""
   let redirectResult = ""
-  let redirectStatus = ""
+  let paymentIntentClientSecret = ""
 
   if (query.PayerID) {
     paypalPayerId = query.PayerID as string
@@ -78,15 +78,19 @@ const Checkout: React.FC<Props> = ({
     checkoutComSession = query["cko-session-id"] as string
   }
 
-  if (query.redirect_status) {
-    redirectStatus = query.redirect_status as string
+  if (query.payment_intent_client_secret) {
+    paymentIntentClientSecret = query.payment_intent_client_secret as string
+  }
+
+  if (query.payment_intent_client_secret) {
+    paymentIntentClientSecret = query.payment_intent_client_secret as string
   }
 
   const checkoutAlreadyStarted =
     !!paypalPayerId ||
     !!redirectResult ||
     !!checkoutComSession ||
-    !!redirectStatus
+    !!paymentIntentClientSecret
 
   const { activeStep, lastActivableStep, setActiveStep, steps } =
     useActiveStep()
@@ -111,6 +115,7 @@ const Checkout: React.FC<Props> = ({
   }
 
   const renderSteps = () => {
+    // @ts-ignore
     return (
       <CustomerContainer isGuest={ctx.isGuest}>
         <LayoutDefault
@@ -206,7 +211,7 @@ const Checkout: React.FC<Props> = ({
                           redirectResult,
                         },
                         stripe: {
-                          redirectStatus,
+                          paymentIntentClientSecret,
                         },
                       }}
                     >

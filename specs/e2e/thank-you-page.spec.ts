@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker"
 
-import { test, expect } from "../fixtures/tokenizedPage"
+import { expect, test } from "../fixtures/tokenizedPage"
 import { euAddress } from "../utils/addresses"
+import type { CommerceLayerClient } from "@commercelayer/sdk"
 
 test.describe("with return url", () => {
   const customerEmail = faker.internet.email().toLocaleLowerCase()
@@ -315,7 +316,106 @@ test.describe("with custom thankyou page url @organization-config", () => {
     expect(url).toMatch(
       thankyouPageUrl
         .replace(":order_id", checkoutPage.getOrderId() as string)
-        .replace(":access_token", checkoutPage.getAccessToken() as string)
+        .replace(":access_token", checkoutPage.getAccessToken() as string),
     )
+  })
+})
+
+test.describe("with custom thankyou page url @organization-config and token", () => {
+  const customerEmail = faker.internet.email().toLocaleLowerCase()
+  const email = faker.internet.email()
+  const thankyouPageUrl =
+    "https://www.google.it/:lang/:order_id/:token?slug=:slug"
+
+  test.use({
+    defaultParams: {
+      order: "with-items",
+      organization: {
+        support_email: email,
+        config: {
+          mfe: { default: { checkout: { thankyou_page: thankyouPageUrl } } },
+        },
+      },
+      orderAttributes: {
+        language_code: "it-IT",
+        customer_email: customerEmail,
+      },
+      lineItemsAttributes: [
+        { sku_code: "CANVASAU000000FFFFFF1824", quantity: 1 },
+      ],
+      addresses: {
+        billingAddress: euAddress,
+        sameShippingAddress: true,
+      },
+    },
+  })
+
+  test("redirect and replace", async ({ checkoutPage }) => {
+    await checkoutPage.checkOrderSummary("Riepilogo Ordine")
+
+    await checkoutPage.selectShippingMethod({ text: "Standard Shipping" })
+
+    await checkoutPage.save("Shipping")
+
+    await checkoutPage.selectPayment("wire")
+
+    await checkoutPage.save("Payment", undefined, true)
+
+    await checkoutPage.page.waitForTimeout(3000)
+
+    await checkoutPage.checkContinueShoppingLink("not_present")
+
+    const url = checkoutPage.page.url()
+
+    expect(url).toMatch(
+      thankyouPageUrl
+        .replace(":lang", "it-IT")
+        .replace(":order_id", checkoutPage.getOrderId() as string)
+        .replace(":token", checkoutPage.getOrderToken() as string)
+        .replace(":slug", process.env.NEXT_PUBLIC_SLUG as string),
+    )
+  })
+})
+
+test.describe("with approved order", () => {
+  const customerEmail = faker.internet.email().toLocaleLowerCase()
+  const customerPassword = faker.internet.password()
+
+  test.use({
+    defaultParams: {
+      order: "with-items",
+      customer: {
+        email: customerEmail,
+        password: customerPassword,
+      },
+      lineItemsAttributes: [
+        { sku_code: "CANVASAU000000FFFFFF1824", quantity: 1 },
+      ],
+      addresses: {
+        billingAddress: euAddress,
+        sameShippingAddress: true,
+      },
+    },
+  })
+
+  test("reload successfully in thankyou page", async ({ checkoutPage }) => {
+    await checkoutPage.checkOrderSummary("Order Summary")
+
+    await checkoutPage.selectShippingMethod({ text: "Standard Shipping" })
+
+    await checkoutPage.save("Shipping")
+
+    await checkoutPage.selectPayment("stripe")
+
+    await checkoutPage.setPayment("stripe")
+
+    await checkoutPage.save("Payment")
+    await checkoutPage.checkPaymentRecap("Visa ending in 4242")
+
+    await checkoutPage.approveOrder()
+
+    await checkoutPage.page.reload()
+
+    await checkoutPage.checkPaymentRecap("Visa ending in 4242")
   })
 })
