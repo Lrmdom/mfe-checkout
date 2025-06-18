@@ -44,8 +44,6 @@ COPY --from=deps /app/node_modules ./node_modules
 # If not copied with COPY ., this might be needed. Adjust based on your COPY . behavior
 # COPY public ./public
 
-
-
 EXPOSE 3000
 
 # --- THE KEY CHANGE FOR DEV MODE ---
