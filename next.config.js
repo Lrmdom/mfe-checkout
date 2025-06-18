@@ -10,6 +10,9 @@ let nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    outputStandalone: true
+  },
   //output: process.env.NODE_ENV === "development" ? "standalone" : "standalone",
 
   output: process.env.NODE_ENV === "development" ? "standalone" : "export",

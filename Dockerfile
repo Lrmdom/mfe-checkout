@@ -1,57 +1,52 @@
-# Stage 1: Builder
-# Usa uma imagem Node.js Alpine específica para consistência e tamanho reduzido.
-FROM node:20.12.2-alpine AS builder
+# syntax=docker.io/docker/dockerfile:1
 
-# Define o diretório de trabalho para a aplicação dentro do contêiner.
+FROM node:18-alpine AS base
+
+# Install corepack and enable pnpm globally for this stage
+RUN corepack enable pnpm
+
+# Install dependencies, including dev dependencies for dev mode
+# We use 'base' here because we want all dependencies for dev mode
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Instala dependências de build necessárias para alguns pacotes nativos (g++, make, py3-pip).
-# Remova se sua aplicação não tiver dependências nativas.
-RUN apk add --no-cache g++ make py3-pip
-
-# Habilita e configura o pnpm para gerenciar pacotes.
-RUN corepack enable && corepack prepare pnpm@8.10.2 --activate
-
-# Copia os arquivos de configuração de dependência primeiro para aproveitar o cache do Docker.
+# Copy package.json and pnpm-lock.yaml to install dependencies
 COPY package.json pnpm-lock.yaml ./
 
-# Define a variável de ambiente para produção.
-ENV NODE_ENV=production
-
-# Instala as dependências do projeto.
+# Install ALL dependencies (production and development) for dev mode
+# --frozen-lockfile is good for reproducibility
 RUN pnpm install
 
-# Copia todo o código-fonte da aplicação para o diretório de trabalho.
-COPY . .
 
-# Executa o comando de build do Next.js.
-# Garanta que seu 'next.config.js' tenha 'output: "standalone"' e, se aplicável, 'distDir: "out"'.
-# O comando 'pnpm run build' gerará os arquivos de build dentro de 'out/dist' conforme sua configuração.
-RUN pnpm run build
+# No separate 'builder' stage needed for dev mode, as we're not building for production output
+# We just need to copy the source and run it directly.
 
-# Stage 2: Runner
-# Usa a mesma imagem Node.js Alpine para o ambiente de execução.
-FROM node:20.12.2-alpine
-
-# Define o diretório de trabalho para a aplicação final.
+# Production image - this will now be your "dev mode" image
+FROM base AS runner
 WORKDIR /app
 
-# Instala 'libc6-compat', que é essencial para o Next.js standalone rodar em Alpine Linux.
-RUN apk add --no-cache libc6-compat
+# Set NODE_ENV to development
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# Copia o diretório de build 'out/dist' (onde o Next.js standalone está localizado)
-# para a raiz do diretório de trabalho do estágio 'runner'.
-# Este diretório 'out/dist' deve conter o 'server.js' e todos os arquivos compilados e estáticos.
-COPY --from=builder /app/out/dist ./
 
-# Copia o diretório 'public' que contém assets estáticos que não são parte do bundle standalone,
-# como imagens e ícones que são servidos diretamente.
-COPY --from=builder /app/public ./public
 
-# A porta que a aplicação Next.js irá escutar.
+# Copy all source code from the initial context
+# This is crucial for dev mode as it needs all source files
+COPY . .
+
+# Copy ALL node_modules from the 'deps' stage (including dev deps)
+COPY --from=deps /app/node_modules ./node_modules
+
+# Ensure public assets are available
+# If not copied with COPY ., this might be needed. Adjust based on your COPY . behavior
+# COPY public ./public
+
+
 EXPOSE 3000
 
-# Define o comando para iniciar a aplicação Next.js.
-# 'node server.js' é o comando padrão para iniciar uma aplicação Next.js standalone
-# quando o 'server.js' está na raiz do diretório de trabalho.
-CMD ["node", "server.js"]
+# --- THE KEY CHANGE FOR DEV MODE ---
+# Run your dev command. Ensure this command actually starts a server that listens on $PORT
+CMD ["pnpm", "serve"]
