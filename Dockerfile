@@ -27,7 +27,7 @@ FROM base AS runner
 WORKDIR /app
 
 # Set NODE_ENV to development
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
@@ -50,4 +50,4 @@ EXPOSE 3000
 
 # --- THE KEY CHANGE FOR DEV MODE ---
 # Run your dev command. Ensure this command actually starts a server that listens on $PORT
-CMD ["pnpm", "serve"]
+CMD ["pnpm", "start"]
