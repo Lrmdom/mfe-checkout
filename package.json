@@ -2,15 +2,14 @@
   "name": "mfe-checkout",
   "version": "5.7.0",
   "engines": {
-    "node": ">=20.x",
-    "pnpm": "10.12.1"
+    "node": ">=20.x"
   },
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "NODE_OPTIONS='--inspect' next dev",
-    "build": "next build",
-    "start": "next start -p $PORT",
+    "dev": "next dev",
+    "build": "next build ",
+    "start": "serve -l $PORT -s out/dist",
     "lint": "pnpm biome check components pages",
     "lint:fix": "pnpm biome check components pages --write",
     "test": "playwright test",

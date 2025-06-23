@@ -268,7 +268,6 @@ export const OrderSummary: React.FC<Props> = ({appCtx, readonly}) => {
                             {order.line_items[0].metadata.bookingData.externalPrice.data.taxasAplicadas?.length > 0 && (
                                 <>
                                   <div className="font-bold mt-2  text-gray-800">Taxas aplicadas:</div>
-                                  // @ts-ignore
                                   {order.line_items[0].metadata.bookingData.externalPrice.data.taxasAplicadas.map((tax: {
                                     name: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | Iterable<ReactNode> | null | undefined;
                                     amount: number
