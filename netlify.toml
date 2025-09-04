@@ -1,3 +1,4 @@
+
 # https://docs.netlify.com/configure-builds/file-based-configuration/
 [build]
 command = "pnpm run build"
@@ -8,4 +9,5 @@ from = "/*"
 to = "/index.html"
 status = 200
 [template.environment]
-NEXT_PUBLIC_SLUG = "Your organization slug"
+NEXT_PUBLIC_SLUG = "Execlog"
+

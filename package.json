@@ -8,14 +8,14 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev",
-    "build": "next build ",
-    "start": "serve -l $PORT -s out/dist",
+    "build": "NEXT_PUBLIC_BASE_PATH=/checkout next build",
+    "start": "serve -s out/checkout",
     "lint": "pnpm biome check components pages",
     "lint:fix": "pnpm biome check components pages --write",
     "test": "playwright test",
     "test:debug": "PWDEBUG=1 playwright test",
     "test:ui": "NEXT_PUBLIC_BASE_PATH=http://localhost:3000 playwright test --ui",
-    "serve": "serve -l tcp://localhost:$PORT/ -n -s out/dist",
+    "serve": "serve -l tcp://localhost:$PORT/ -n -s out/checkout",
     "dep:upgrade:major": "pnpm exec npm-check-updates -u",
     "dep:upgrade:minor": "pnpm dep:upgrade:major -t minor",
     "browserslist:update": "pnpm dlx update-browserslist-db@latest"
