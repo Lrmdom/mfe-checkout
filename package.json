@@ -9,7 +9,7 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev",
     "build": "NEXT_PUBLIC_BASE_PATH=/checkout next build",
-    "start": "serve -s out/checkout",
+    "start": "next start",
     "lint": "pnpm biome check components pages",
     "lint:fix": "pnpm biome check components pages --write",
     "test": "playwright test",
