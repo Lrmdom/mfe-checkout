@@ -31,7 +31,7 @@ const Order: NextPage = () => {
     }
     return <RetryError />
   }
-
+console.log("leo",settings)
   return (
     <DynamicCheckoutContainer settings={settings}>
       <DynamicCheckout
@@ -46,8 +46,6 @@ const Order: NextPage = () => {
         termsUrl={settings.termsUrl}
         privacyUrl={settings.privacyUrl}
         gtmId={settings.gtmId}
-        expiresAt={settings.expiresAt}
-        expirationInfo={settings.expirationInfo}
       />
     </DynamicCheckoutContainer>
   )

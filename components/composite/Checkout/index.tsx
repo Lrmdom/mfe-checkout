@@ -9,7 +9,6 @@ import {
   StepCustomer,
   StepHeaderCustomer,
 } from "components/composite/StepCustomer"
-import { StepExpired } from "components/composite/StepExpired"
 import { StepNav } from "components/composite/StepNav"
 import {
   StepHeaderPayment,
@@ -30,7 +29,7 @@ import { Accordion, AccordionItem } from "components/ui/Accordion"
 import { Footer } from "components/ui/Footer"
 import { Logo } from "components/ui/Logo"
 import { useRouter } from "next/router"
-import { useContext, useState } from "react"
+import { useContext } from "react"
 
 interface Props {
   logoUrl: NullableType<string>
@@ -44,8 +43,6 @@ interface Props {
   termsUrl: NullableType<string>
   privacyUrl: NullableType<string>
   gtmId: NullableType<string>
-  expiresAt: NullableType<string>
-  expirationInfo: NullableType<ExpirationInfo>
 }
 
 const Checkout: React.FC<Props> = ({
@@ -60,11 +57,8 @@ const Checkout: React.FC<Props> = ({
   termsUrl,
   privacyUrl,
   gtmId,
-  expiresAt,
-  expirationInfo,
 }) => {
   const ctx = useContext(AppContext)
-  const [isExpired, setIsExpired] = useState(false)
 
   const { query } = useRouter()
 
@@ -106,23 +100,9 @@ const Checkout: React.FC<Props> = ({
     return steps.indexOf(stepName) + 1
   }
 
-  const isFinished = () => {
-    setIsExpired(true)
-  }
-
   if (!ctx || ctx.isFirstLoading) {
     return <CheckoutSkeleton />
   }
-
-  const renderExpiredPage = () => (
-    <StepExpired
-      logoUrl={logoUrl}
-      companyName={companyName}
-      thankyouPageUrl={thankyouPageUrl}
-      expirationInfo={expirationInfo}
-    />
-  )
-
   const renderComplete = () => {
     return (
       <StepComplete
@@ -139,7 +119,9 @@ const Checkout: React.FC<Props> = ({
   const isPaymentLoading = checkoutAlreadyStarted && !ctx.isComplete
 
   const renderSteps = () => {
-    return (
+
+
+      return (
       <CustomerContainer isGuest={ctx.isGuest}>
         <LayoutDefault
           aside={
@@ -150,13 +132,8 @@ const Checkout: React.FC<Props> = ({
                 className="hidden md:block"
               />
               <div className="flex-1">
-                <OrderSummary
-                  appCtx={ctx}
-                  hideItemCodes={hideItemCodes}
-                  isFinished={isFinished}
-                  expiresAt={expiresAt}
-                  expirationInfo={expirationInfo}
-                />
+                  // @ts-ignore
+                <OrderSummary appCtx={ctx} hideItemCodes={hideItemCodes} />
               </div>
               <Footer />
             </div>
@@ -168,12 +145,9 @@ const Checkout: React.FC<Props> = ({
                 companyName={companyName}
                 className="block md:hidden"
               />
-              <MainHeader
-                orderNumber={orderNumber}
-                expiresAt={expiresAt}
-                isFinished={isFinished}
-                expirationInfo={expirationInfo}
-              />
+              <MainHeader orderNumber={orderNumber} expiresAt={undefined} isFinished={function (): void {
+                  throw new Error("Function not implemented.")
+              }} expirationInfo={undefined} />
               <StepNav
                 steps={steps}
                 activeStep={activeStep}
@@ -283,11 +257,7 @@ const Checkout: React.FC<Props> = ({
         gtmId={gtmId}
         skipBeginCheckout={checkoutAlreadyStarted || ctx.isComplete}
       >
-        {ctx.isComplete
-          ? renderComplete()
-          : isExpired
-            ? renderExpiredPage()
-            : renderSteps()}
+        {ctx.isComplete ? renderComplete() : renderSteps()}
       </GTMProvider>
     </OrderContainer>
   )
