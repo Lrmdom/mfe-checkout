@@ -29,6 +29,7 @@ export const AddressSectionSaveOnAddressBook: React.FC<Props> = ({
         name={fieldName}
         id={fieldName}
         type="checkbox"
+        checked={true}
         required={false}
         className={`form-checkbox ${CheckCss}`}
       />
