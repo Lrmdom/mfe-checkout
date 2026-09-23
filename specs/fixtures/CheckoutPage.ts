@@ -423,6 +423,12 @@ export class CheckoutPage {
       `[data-testid=input_${type}_last_name]`,
       (address.last_name as string) || "",
     )
+    if (address.company) {
+      await this.page.fill(
+        `[data-testid=input_${type}_company]`,
+        (address.company as string) || "",
+      )
+    }
     await this.page.fill(
       `[data-testid=input_${type}_line_1]`,
       (address.line_1 as string) || "",
@@ -481,7 +487,6 @@ export class CheckoutPage {
   }
 
   async setShippingAddress(address?: Partial<Address>) {
-    // biome-ignore lint/correctness/noUnusedVariables: here we use the rest
     const { billing_info, ...addressToFill } = address || euAddress2
     await this.setAddress({ address: addressToFill, type: "shipping_address" })
   }
@@ -596,6 +601,22 @@ export class CheckoutPage {
     await this.page.click("[data-testid=submit_giftcard_coupon]")
   }
 
+  async checkCouponInput({ presence }: { presence: boolean }) {
+    const element = this.page.locator("[data-testid=input_giftcard_coupon]")
+    await expect(element).toHaveCount(presence ? 1 : 0)
+  }
+
+  async checkOptionalCompanyName({
+    presence,
+    type,
+  }: {
+    presence: boolean
+    type: "billing_address" | "shipping_address"
+  }) {
+    const element = this.page.locator(`[data-testid=input_${type}_company]`)
+    await expect(element).toHaveCount(presence ? 1 : 0)
+  }
+
   async removeCoupon() {
     await this.page.click("[data-testid=remove_coupon]")
   }
@@ -676,7 +697,7 @@ export class CheckoutPage {
   }
 
   async checkGiftCardAmount(text?: string) {
-    const element = await this.page.locator(
+    const element = this.page.locator(
       `[data-testid=giftcard-amount] >> text=${text}`,
     )
     if (text !== undefined) {
@@ -776,6 +797,7 @@ export class CheckoutPage {
       | "klarna_pay_later"
       | "klarna_pay_now"
       | "klarna"
+      | "givex"
     language?: "fr" | "de" | "us"
   }) {
     switch (type) {
@@ -848,9 +870,19 @@ export class CheckoutPage {
           await pickPlan.click()
         }
         const confirmAndPay = klarnaIframe.getByTestId("confirm-and-pay")
+        await this.page.waitForTimeout(4000)
+
         if (await confirmAndPay.isVisible()) {
-          await confirmAndPay.click()
+          await confirmAndPay.click({ force: true })
         }
+
+        klarnaIframe.getByTestId("confirm-and-pay")
+        await this.page.waitForTimeout(4000)
+
+        if (await confirmAndPay.isVisible()) {
+          await confirmAndPay.click({ force: true })
+        }
+
         const button = klarnaIframe.getByRole("button", { name: "Continue" })
         if (await button.isVisible()) {
           button.click()
@@ -916,6 +948,22 @@ export class CheckoutPage {
             }
             await newPage.click('[data-testid="submit-button-initial"]')
 
+            break
+          }
+          case "givex": {
+            await this.page.getByRole("radio", { name: "Givex" }).click()
+            await this.page
+              .locator('iframe[title="Iframe for card number"] >> nth=1')
+              .contentFrame()
+              .getByRole("textbox", { name: "Card Number" })
+              .fill("6036280000000000000")
+            await this.page
+              .locator('iframe[title="Iframe for pin"]')
+              .contentFrame()
+              .getByRole("textbox", { name: "Pin" })
+              .fill("1234")
+            await this.page.getByRole("button", { name: "Redeem" }).click()
+            await this.page.waitForTimeout(2000)
             break
           }
           case "klarna_pay_now": {
@@ -1226,6 +1274,36 @@ export class CheckoutPage {
     }
   }
 
+  async partialPayment({
+    type = "adyen-dropin",
+    gateway = "givex",
+  }: {
+    type?: "adyen-dropin"
+    gateway?: "givex"
+  }) {
+    switch (type) {
+      case "adyen-dropin": {
+        switch (gateway) {
+          case "givex": {
+            await this.page.getByRole("radio", { name: "Givex" }).click()
+            await this.page
+              .locator('iframe[title="Iframe for card number"] >> nth=1')
+              .contentFrame()
+              .getByRole("textbox", { name: "Card Number" })
+              .fill("6036280000000000000")
+            await this.page
+              .locator('iframe[title="Iframe for pin"]')
+              .contentFrame()
+              .getByRole("textbox", { name: "Pin" })
+              .fill("1234")
+            await this.page.getByRole("button", { name: "Redeem" }).click()
+            break
+          }
+        }
+      }
+    }
+  }
+
   async selectStripePaymentMethod(
     method: "card" | "paypal" | "affirm" | "klarna",
   ) {
@@ -1242,24 +1320,31 @@ export class CheckoutPage {
       "[data-testid=stripe_payments] iframe",
     )
 
-    // Wait until the button is visible on the Stripe frame
+    // Wait until the Stripe iframe renders the payment method label (button or generic tab)
     await expect(async () => {
-      const button = stripeFrameLocator.getByRole("button", {
-        name: label,
-      })
-      await expect(button).toBeVisible()
+      await expect(
+        stripeFrameLocator.getByText(label, { exact: true }),
+      ).toBeVisible()
     }).toPass()
 
-    await this.page.mouse.wheel(0, 300)
-
+    // Stripe may render tabs as <button> elements or as generic elements depending on
+    // how many payment methods are available. Click only when it is a button.
     const cardButton = stripeFrameLocator.getByRole("button", {
       name: label,
     })
     if (await cardButton.isVisible()) {
-      // Click the card button if it is visible
+      const box = await cardButton.boundingBox()
+      const viewport = this.page.viewportSize()
+      if (
+        box != null &&
+        viewport != null &&
+        box.y + box.height > viewport.height
+      ) {
+        // Element inside the cross-origin Stripe iframe is below the fold:
+        // Playwright can't scroll the outer page for it, so do it ourselves.
+        await this.page.mouse.wheel(0, box.y + box.height - viewport.height + 100)
+      }
       await cardButton.click({ force: true })
-    } else {
-      throw new Error(`Payment method ${method} is not available`)
     }
     return stripeFrameLocator
   }
@@ -1309,7 +1394,7 @@ export class CheckoutPage {
         await stripeFrameLocator
           .getByPlaceholder("MM / YY")
           .fill(creditCard.exp)
-        await stripeFrameLocator.locator("#Field-cvcInput").fill(creditCard.cvc)
+        await stripeFrameLocator.locator("#payment-cvcInput").fill(creditCard.cvc)
         break
       }
       case "stripe-paypal": {

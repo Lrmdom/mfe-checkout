@@ -8,13 +8,12 @@ import ShippingAmount from "@commercelayer/react-components/orders/ShippingAmoun
 import SubTotalAmount from "@commercelayer/react-components/orders/SubTotalAmount"
 import TaxesAmount from "@commercelayer/react-components/orders/TaxesAmount"
 import TotalAmount from "@commercelayer/react-components/orders/TotalAmount"
-import useOrderContainer from "@commercelayer/react-components/hooks/useOrderContainer"
-
 import type { AppProviderData } from "components/data/AppProvider"
+import useDeviceDetect from "components/hooks/useDeviceDetect"
 import { LINE_ITEMS_SHOPPABLE } from "components/utils/constants"
 import { Trans, useTranslation } from "react-i18next"
-
 import { CouponOrGiftCard } from "./CouponOrGiftCard"
+import { ExpireTimer } from "./ExpireTimer"
 import { LineItemTypes } from "./LineItemTypes"
 import { ReturnToCart } from "./ReturnToCart"
 import {
@@ -36,7 +35,10 @@ import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, AwaitedRea
 interface Props {
   appCtx: AppProviderData
   hideItemCodes?: NullableType<boolean>
-  readonly?: boolean
+  readonly?: boolean,
+    isFinished?: () => void
+  expiresAt?: NullableType<string>
+  expirationInfo?: NullableType<ExpirationInfo>
 }
 interface BookingExtra {
     id: string
@@ -60,53 +62,32 @@ interface VehicleBookingMetadata {
     total_amount_cents: number
 }
 
-interface AssuranceCoverage {
-    title: string
-    description: string
-}
-
-interface AssurancePack {
-    packagePriceBasedOnDays: number
-    packageDetails: {
-        title: string
-        description: string
-        includedCoverages: AssuranceCoverage[]
-    }
-}
-
-interface BookingData {
-    externalPrice: JSX.Element;
-    step_1: [{ metadata: VehicleBookingMetadata }]
-    step_2?: BookingExtra[]
-    step_3?: Accessory[]
-    assurancePack?: AssurancePack
-    totalPrice: number
-}
 export const OrderSummary: React.FC<Props> = ({
   appCtx,
   readonly,
   hideItemCodes,
+  isFinished,
+  expiresAt,
+  expirationInfo,
 }) => {
   const { t } = useTranslation()
+  const { isMobile } = useDeviceDetect()
 
   const isTaxCalculated = appCtx.isShipmentRequired
     ? appCtx.hasBillingAddress &&
       appCtx.hasShippingAddress &&
       appCtx.hasShippingMethod
-      : appCtx.hasBillingAddress
-  const {order} = useOrderContainer()
+    : appCtx.hasBillingAddress
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const day = String(date.getDate()).padStart(2, "0")
-    const month = String(date.getMonth() + 1).padStart(2, "0")
-    const year = date.getFullYear()
-    const hours = String(date.getHours()).padStart(2, "0")
-    const minutes = String(date.getMinutes()).padStart(2, "0")
-    return `${day}/${month}/${year} ${hours}:${minutes}`
-  }
   const lineItems = !readonly ? (
     <SummaryHeader>
+      {expiresAt != null && !isMobile && (
+        <ExpireTimer
+          expiresAt={expiresAt}
+          expirationInfo={expirationInfo}
+          isFinished={isFinished}
+        />
+      )}
       <SummaryTitle data-testid="test-summary">
         {t("orderRecap.order_summary")}
       </SummaryTitle>
@@ -321,10 +302,12 @@ export const OrderSummary: React.FC<Props> = ({
       <TotalWrapper>
         <AmountSpacer />
         <AmountWrapper>
-          <CouponOrGiftCard
-            readonly={readonly}
-            setCouponOrGiftCard={appCtx.setCouponOrGiftCard}
-          />
+          {!hide_promo_code && (
+            <CouponOrGiftCard
+              readonly={readonly}
+              setCouponOrGiftCard={appCtx.setCouponOrGiftCard}
+            />
+          )}
           <RecapLine>
             <RecapLineItem>{t("orderRecap.subtotal_amount")}</RecapLineItem>
             <SubTotalAmount />
