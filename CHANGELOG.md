@@ -1,3 +1,120 @@
+## [6.5.5](https://github.com/commercelayer/mfe-checkout/compare/v6.5.4...v6.5.5) (2026-08-21)
+
+
+### Bug Fixes
+
+* update depencencies respecting semver ([7242ca9](https://github.com/commercelayer/mfe-checkout/commit/7242ca97c694bbaa5d005b8107c73cfc0cd985c2))
+* update GTM context methods to return promises for async handling ([3f755b3](https://github.com/commercelayer/mfe-checkout/commit/3f755b3dd0fd66ce12cd952865d4b6a6d48173f5))
+
+## [6.5.4](https://github.com/commercelayer/mfe-checkout/compare/v6.5.3...v6.5.4) (2026-07-08)
+
+
+### Bug Fixes
+
+* defer setOrder to avoid render-phase state update warning ([568de3e](https://github.com/commercelayer/mfe-checkout/commit/568de3e6993425418d0b6078040ffb3678e3f3db))
+* scroll Stripe payment tab into view before clicking ([e48b665](https://github.com/commercelayer/mfe-checkout/commit/e48b665830151f078fbd9774ab2b0644d56e4295))
+
+## [6.5.3](https://github.com/commercelayer/mfe-checkout/compare/v6.5.2...v6.5.3) (2026-05-14)
+
+
+### Bug Fixes
+
+* update `next-i18next` to latest version ([b394588](https://github.com/commercelayer/mfe-checkout/commit/b394588918bdffd2102b5a27b366db65f0bcb647))
+* update packages to latest minor ([eeb09b5](https://github.com/commercelayer/mfe-checkout/commit/eeb09b59bc2a0cd022ed9391fd18761be29504bc))
+
+## [6.5.2](https://github.com/commercelayer/mfe-checkout/compare/v6.5.1...v6.5.2) (2026-04-30)
+
+
+### Bug Fixes
+
+* Stripe selector tests ([cb51a6b](https://github.com/commercelayer/mfe-checkout/commit/cb51a6b11947b704bf9f06d7c99976eab5a931d4))
+
+## [6.5.1](https://github.com/commercelayer/mfe-checkout/compare/v6.5.0...v6.5.1) (2026-04-08)
+
+
+### Bug Fixes
+
+* refine place order button on errors ([6b4a68f](https://github.com/commercelayer/mfe-checkout/commit/6b4a68f73c1be45c4c532c0dda26002f3acd0ae9))
+
+# [6.5.0](https://github.com/commercelayer/mfe-checkout/compare/v6.4.6...v6.5.0) (2026-03-19)
+
+
+### Bug Fixes
+
+* update @commercelayer/react-components to version 4.29.5 ([902c60d](https://github.com/commercelayer/mfe-checkout/commit/902c60d6340214a91c2c2ad730ab02a1949870ff))
+
+
+### Features
+
+* fallback on privacy and terms urls in organization config ([82e42bd](https://github.com/commercelayer/mfe-checkout/commit/82e42bdcd8a532e812aebaff3c5918c00e55b306))
+
+## [6.4.6](https://github.com/commercelayer/mfe-checkout/compare/v6.4.5...v6.4.6) (2026-03-09)
+
+
+### Bug Fixes
+
+* upgrade dependencies ([19e2ce3](https://github.com/commercelayer/mfe-checkout/commit/19e2ce3128a3a045df2196df90b7024dcf827ce2))
+
+## [6.4.5](https://github.com/commercelayer/mfe-checkout/compare/v6.4.4...v6.4.5) (2026-02-20)
+
+
+### Bug Fixes
+
+* avoid double adyen payments with single payment ([710333d](https://github.com/commercelayer/mfe-checkout/commit/710333d871fa2a0dd500775473a957233381940b))
+* update packages and add tests for expired order on adyen and partial payments ([ebd36a1](https://github.com/commercelayer/mfe-checkout/commit/ebd36a1467369eaf1e6d9461875dad8a55ca377f))
+* upgrade dependencies and adyen-web ([9b13186](https://github.com/commercelayer/mfe-checkout/commit/9b131868ac99ffd22e54a67d60506adfd7cf0f23))
+
+## [6.4.4](https://github.com/commercelayer/mfe-checkout/compare/v6.4.3...v6.4.4) (2026-01-27)
+
+
+### Bug Fixes
+
+* enable place order button with gift card and adyen as single payment method ([50b3e15](https://github.com/commercelayer/mfe-checkout/commit/50b3e151fe018d756e1acc5845e8acff49d37a8a))
+* upgrade dependencies and adjust stripe tests ([2f44d74](https://github.com/commercelayer/mfe-checkout/commit/2f44d74a47262cf6c18ebc59cce678a12b42a024))
+
+## [6.4.3](https://github.com/commercelayer/mfe-checkout/compare/v6.4.2...v6.4.3) (2025-12-17)
+
+
+### Bug Fixes
+
+* update all dependencies ([615dfa3](https://github.com/commercelayer/mfe-checkout/commit/615dfa325c6829cac164be2d731b10d190e610dd))
+
+## [6.4.2](https://github.com/commercelayer/mfe-checkout/compare/v6.4.1...v6.4.2) (2025-12-11)
+
+
+### Bug Fixes
+
+* update packages ([7dd9c20](https://github.com/commercelayer/mfe-checkout/commit/7dd9c205da0e5bbd11eba7c784d01a00e5f66fb5))
+
+## [6.4.1](https://github.com/commercelayer/mfe-checkout/compare/v6.4.0...v6.4.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* avoid placed order with unpaid payment_status ([568b79e](https://github.com/commercelayer/mfe-checkout/commit/568b79eb677ab2e42c3c941daff0c5ed96b8e5fd))
+
+# [6.4.0](https://github.com/commercelayer/mfe-checkout/compare/v6.3.0...v6.4.0) (2025-11-13)
+
+
+### Features
+
+* add optional company and option to hide promo code ([d162643](https://github.com/commercelayer/mfe-checkout/commit/d16264378f1e476e390d9f4b864d0d950619d460))
+
+# [6.3.0](https://github.com/commercelayer/mfe-checkout/compare/v6.2.6...v6.3.0) (2025-11-12)
+
+
+### Features
+
+* enable partial payment with givex on adyen ([e98dbaf](https://github.com/commercelayer/mfe-checkout/commit/e98dbaf94fd8b289dfb12ec07e91b0ea90fa8858))
+
+## [6.2.6](https://github.com/commercelayer/mfe-checkout/compare/v6.2.5...v6.2.6) (2025-11-04)
+
+
+### Bug Fixes
+
+* update github release workflow ([04c7428](https://github.com/commercelayer/mfe-checkout/commit/04c7428b59e533e8d2ecd92e6bb2b3847d99d05a))
+* upgrade packages to latest version ([2ae0cbf](https://github.com/commercelayer/mfe-checkout/commit/2ae0cbfa383f8128061be354c015a3f9d15a1551))
+
 ## [6.2.5](https://github.com/commercelayer/mfe-checkout/compare/v6.2.4...v6.2.5) (2025-10-24)
 
 

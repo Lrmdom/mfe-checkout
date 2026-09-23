@@ -11,7 +11,7 @@ import "../styles/step-container.css"
 import "../styles/address-input.css"
 import "../styles/accordion.css"
 
-import { appWithTranslation } from "next-i18next"
+import { appWithTranslation } from "next-i18next/pages"
 
 import "components/data/i18n"
 import { loadNewRelicAgent } from "components/data/NewRelic"
