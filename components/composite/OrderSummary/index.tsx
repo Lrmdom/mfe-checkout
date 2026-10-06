@@ -55,6 +55,8 @@ interface Accessory {
 }
 
 interface VehicleBookingMetadata {
+    end_date: string
+    start_date: string
     start_Date: string
     end_Date: string
     number_of_days: number
@@ -176,8 +178,8 @@ export const OrderSummary: React.FC<Props> = ({
 
                         <div className="text-sm text-gray-700 space-y-3">
                             <p>
-                                <strong>Período:</strong> {formatDate(vehicle.start_Date)} até{" "}
-                                {formatDate(vehicle.end_Date)} ({vehicle.number_of_days} dias)
+                                <strong>Período:</strong> {formatDate(vehicle.start_date)} até{" "}
+                                {formatDate(vehicle.end_date)} ({vehicle.number_of_days} dias)
                             </p>
                             <p>
                                 <strong>Recolha / Entrega:</strong> {vehicle.pick_location}
