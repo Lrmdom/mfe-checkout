@@ -274,7 +274,8 @@ export const OrderSummary: React.FC<Props> = ({
                                     </ul>
                                 </div>
                             )}
-                            {order?.line_items?.[0]?.metadata?.bookingData?.externalPrice?.data && (
+
+                            {order?.line_items?.[0]?.metadata?.taxasAplicadas && (
                                 <div className="pt-3 mt-3 border-t border-gray-100 text-sm text-gray-700 space-y-2">
                                     <strong className="block text-base">Detalhes de Preço:</strong>
 
@@ -289,10 +290,10 @@ export const OrderSummary: React.FC<Props> = ({
                           ))}*/}
 
                                     {/* Taxas Aplicadas */}
-                                    {order.line_items[0].metadata.bookingData.externalPrice.data.taxasAplicadas?.length > 0 && (
+                                    {order.line_items[0].metadata.taxasAplicadas?.length > 0 && (
                                         <>
                                             <div className="font-bold mt-2  text-gray-800">Taxas aplicadas:</div>
-                                            {order.line_items[0].metadata.bookingData.externalPrice.data.taxasAplicadas.map((tax: {
+                                            {order.line_items[0].metadata.taxasAplicadas.map((tax: {
                                                 name: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | Iterable<ReactNode> | null | undefined;
                                                 amount: number
                                             }, i: Key | null | undefined) => (
